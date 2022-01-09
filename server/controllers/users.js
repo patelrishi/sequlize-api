@@ -86,28 +86,39 @@ module.exports = {
   getUserList: asyncHandler(async (req, res) => {
     const userId = req.params.id;
     const user = await Users.findOne({ where: { id: userId } });
+    const DEFAULT_PAGE_SIZE = 2;
     if (user) {
       let useList;
 
       if (user.blackList !== "") {
-        userList = await Users.findAll({
+        userList = await Users.findAndCountAll({
           where: {
             id: {
               [Op.notIn]: [...user.blackList.split(","), userId],
             },
           },
+          offset: 1,
+          limit: DEFAULT_PAGE_SIZE,
+          order: [["createdAt", "ASC"]],
         });
       } else {
-        userList = await Users.findAll({
+        userList = await Users.findAndCountAll({
           where: {
             id: {
               [Op.notIn]: [userId],
             },
           },
+          offset: 1,
+          limit: DEFAULT_PAGE_SIZE,
+          order: [["createdAt", "ASC"]],
+          // order: [["createdAt", "DESC"]],
         });
       }
       if (userList) {
-        res.status(200).send(userList);
+        res.status(200).send({
+          users: userList.rows,
+          total: userList.count,
+        });
       } else {
         res.status(400).send("something went wrong");
       }

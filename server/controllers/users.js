@@ -22,7 +22,7 @@ module.exports = {
       res.status(400).send("email address is already taken");
     } else {
       const newUser = await Users.create({
-        name: name,
+        name,
         email: email,
         password: passwordHash,
         contact: contact,
@@ -100,7 +100,7 @@ module.exports = {
       },
     };
 
-    if (startDate && endDate) {
+    if (startDate !== "" && endDate !== "") {
       whereQuery["createdAt"] = { [Op.between]: [startedDate, endedDate] };
     }
     if (searchQuery) {

@@ -19,6 +19,8 @@ const router = express.Router();
 router.route("/users/register").post(userController.registerUser);
 router.route("/users/login").post(userController.loginUser);
 router.route("/users").post(protect, userController.getUserList);
-router.route("/users/blacklist").post(userController.addUserToBlackList);
+router
+  .route("/users/blacklist")
+  .post(protect, userController.addUserToBlackList);
 router.route("/users/token").post(userController.generateNewToken);
 module.exports = router;

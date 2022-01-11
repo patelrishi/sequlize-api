@@ -16,9 +16,9 @@ const router = express.Router();
 // app.post("/api/v1/users/blacklist", userController.addUserToBlackList);
 
 // user routes
-router.route("/users").post(userController.registerUser);
+router.route("/users/register").post(userController.registerUser);
 router.route("/users/login").post(userController.loginUser);
-router.route("/users/:id").get(protect, userController.getUserList);
+router.route("/users").post(protect, userController.getUserList);
 router.route("/users/blacklist").post(userController.addUserToBlackList);
 router.route("/users/token").post(userController.generateNewToken);
 module.exports = router;

@@ -84,40 +84,48 @@ module.exports = {
   // access private
   // route Get /users
   getUserList: asyncHandler(async (req, res) => {
-    const userId = req.params.id;
-    const user = await Users.findOne({ where: { id: userId } });
-    const DEFAULT_PAGE_SIZE = 2;
-    if (user) {
-      let useList;
+    // const userId = req.params.id;
+    const { id, startDate, endDate, searchQuery, page } = req.body;
 
-      if (user.blackList !== "") {
-        userList = await Users.findAndCountAll({
-          where: {
-            id: {
-              [Op.notIn]: [...user.blackList.split(","), userId],
-            },
-          },
-          offset: 1,
-          limit: DEFAULT_PAGE_SIZE,
-          order: [["createdAt", "ASC"]],
-        });
-      } else {
-        userList = await Users.findAndCountAll({
-          where: {
-            id: {
-              [Op.notIn]: [userId],
-            },
-          },
-          offset: 1,
-          limit: DEFAULT_PAGE_SIZE,
-          order: [["createdAt", "ASC"]],
-          // order: [["createdAt", "DESC"]],
-        });
-      }
+    const startedDate = new Date(startDate);
+    const endedDate = new Date(endDate);
+
+    const user = await Users.findOne({ where: { id: id } });
+    const DEFAULT_PAGE_SIZE = 5;
+    // QUERY
+
+    let whereQuery = {
+      id: {
+        [Op.notIn]: [...user.blackList.split(","), id],
+      },
+    };
+
+    if (startDate && endDate) {
+      whereQuery["createdAt"] = { [Op.between]: [startedDate, endedDate] };
+    }
+    if (searchQuery) {
+      whereQuery["name"] = {
+        [Op.like]: "%" + searchQuery + "%",
+      };
+    }
+    // QUERY
+
+    if (user) {
+      userList = await Users.findAndCountAll({
+        where: whereQuery,
+
+        offset: DEFAULT_PAGE_SIZE * (parseInt(page ? page : 1) - 1),
+        limit: DEFAULT_PAGE_SIZE,
+        // order: [["createdAt", "ASC"]],
+      });
+
       if (userList) {
         res.status(200).send({
           users: userList.rows,
           total: userList.count,
+          pages: Math.ceil(userList.count / DEFAULT_PAGE_SIZE),
+          currentPage: parseInt(page ? page : 1),
+          offset: DEFAULT_PAGE_SIZE * (parseInt(page ? page : 1) - 1),
         });
       } else {
         res.status(400).send("something went wrong");
@@ -147,7 +155,10 @@ module.exports = {
       const updatedUser = await user.update({
         blackList: blackList.toString() || user.blackList,
       });
-      res.status(400).send(updatedUser);
+      res.status(200).send({
+        message: "user deleted Successfully..!",
+        success: true,
+      });
     } else {
       res.status(400).send("user not found");
     }

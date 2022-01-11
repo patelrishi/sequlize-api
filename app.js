@@ -7,7 +7,7 @@ dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(logger("dev"));
+// app.use(logger("dev"));
 
 const indexRoutes = require("./server/routes/index");
 //connecting DB

@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const asyncHandler = require("express-async-handler");
 
 const protect = asyncHandler(async (req, res, next) => {
+  console.log(req, "----------->body");
   let token;
   // console.log(req.headers);
   if (req.headers.authorization) {
@@ -9,7 +10,7 @@ const protect = asyncHandler(async (req, res, next) => {
       token = req.headers.authorization.split(" ")[1];
 
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      console.log(decoded, "decodedddd=------------>");
+
       // req.user = await User.findById(decoded.id).select("-password");
       // const user = await Users.findOne({ where: { id: decoded.id } });
 
